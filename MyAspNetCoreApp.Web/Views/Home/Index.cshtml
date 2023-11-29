@@ -1,11 +1,14 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+    var product = new Product() { Id = 1, Name = "Product Name", Price = 50, Stock = 100 };
 }
 
 <div class="row">
+
     <div class="col-md-4">
         <partial name="~/PartialViews/_ProductListPartialView.cshtml" model="@ViewBag.ProductListPartialViewModel" />
     </div>
+
     <div class="col-md-4">
 
         @*1.Yol
@@ -14,4 +17,16 @@
         @*2.Yol*@
         <vc:product-list ></vc:product-list>
     </div>
+
+    <div class="col-md-4">
+
+        <italic>ASP.NET CORE</italic>
+        <product-show product="@product"></product-show>
+    </div>
+
+</div>
+
+<div>
+    <img src="images/car.jpg" />
+    <thumbnail image-src="images/car.jpg"></thumbnail>
 </div>
