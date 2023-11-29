@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using MyAspNetCoreApp.Web.Models;
 using MyAspNetCoreApp.Web.ViewModels;
 using System.Diagnostics;
@@ -9,11 +10,13 @@ namespace MyAspNetCoreApp.Web.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly AppDbContext _appDbContext;
+        private readonly IMapper _mapper;
 
-        public HomeController(ILogger<HomeController> logger, AppDbContext appDbContext)
+        public HomeController(ILogger<HomeController> logger, AppDbContext appDbContext, IMapper mapper)
         {
             _logger = logger;
             _appDbContext = appDbContext;
+            _mapper = mapper;
         }
 
         public IActionResult Index()
@@ -48,6 +51,35 @@ namespace MyAspNetCoreApp.Web.Controllers
             { Products = products };
 
             return View();
+        }
+
+        public IActionResult Visitor()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult SaveVisitorComment(VisitorViewModel visitorViewModel)
+        {
+            try
+            {
+                var visitor = _mapper.Map<Visitor>(visitorViewModel);
+
+                visitor.Created = DateTime.Now;
+
+                _appDbContext.Visitors.Add(visitor);
+                _appDbContext.SaveChanges();
+
+                TempData["result"] = "Yorum başarılı bir şekilde kaydedilmiştir.";
+
+                return RedirectToAction(nameof(HomeController.Visitor));
+            }
+            catch (Exception)
+            {
+                TempData["result"] = "Yorum kaydedilirken bir hata oluşmuştur.";
+
+                return RedirectToAction(nameof(HomeController.Visitor));
+            }
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
