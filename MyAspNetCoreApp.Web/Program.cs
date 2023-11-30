@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using MyAspNetCoreApp.Web.Filters;
 using MyAspNetCoreApp.Web.Helpers;
 using MyAspNetCoreApp.Web.Models;
 using System.Reflection;
@@ -16,7 +17,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 //DI Container
 builder.Services.AddSingleton<IHelper,Helper>();
-
+builder.Services.AddScoped<NotFoundFilter>();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 var app = builder.Build();
