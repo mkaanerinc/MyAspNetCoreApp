@@ -1,18 +1,12 @@
 ﻿@model List<ProductViewModel>
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Pages";
 }
 
-<h1>Ürünler</h1>
+<h1>Pages</h1>
+<h2>@ViewBag.Page</h2>
+<h2>@ViewBag.PageSize</h2>
 
-@if (TempData["status"] != null)
-{
-    <div class="alert alert-success" role="alert">
-        @TempData["status"]
-    </div>
-}
-
-<a asp-controller="Product" asp-action="Add"> Ürün Ekle</a>
 <table class="table">
     <thead>
         <tr>
@@ -25,7 +19,7 @@
             <th>Süre(Ay)</th>
             <th>Ürün açıklama</th>
             <th>İşlem</th>
-        </tr>   
+        </tr>
     </thead>
     <tbody>
         @foreach (var product in Model)
@@ -38,9 +32,12 @@
                 <td>@product.Color</td>
                 <td>@(product.isPublish ? "Evet" : "Hayır")</td>
                 <td>@product.Expire</td>
-                <td>@if (product.Description.Length > 20)
+                <td>
+                    @if (product.Description.Length > 20)
                     {
-                        @product.Description.Substring(0,20)<text>...</text>
+                        @product.Description.Substring(0,20)
+
+                        <text>...</text>
                     }
                     else
                     {
@@ -55,9 +52,5 @@
             </tr>
         }
     </tbody>
-    
-</table>
-<a asp-controller="Blog" asp-action="Article" asp-route-name="makale-ismi" asp-route-id=1>Makaleye git</a>
-<a asp-controller="Product" asp-action="Pages" asp-route-page=1 asp-route-pageSize=3>1 sayfadan 3 ürün ver</a>
-<a asp-controller="Product" asp-action="Pages" asp-route-page=2 asp-route-pageSize=3>2 sayfadan 3 ürün ver</a>
 
+</table>
