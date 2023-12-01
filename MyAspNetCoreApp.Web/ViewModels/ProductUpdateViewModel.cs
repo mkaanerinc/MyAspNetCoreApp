@@ -1,16 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
 namespace MyAspNetCoreApp.Web.ViewModels
 {
-    public class ProductViewModel
+    public class ProductUpdateViewModel
     {
         public int Id { get; set; }
 
-        [Remote(action:"HasProductName", controller:"Product")]
         [Required(ErrorMessage = "Ürün ismi boş olamaz.")]
-        [StringLength(maximumLength:50, MinimumLength = 2, 
+        [StringLength(maximumLength: 50, MinimumLength = 2,
             ErrorMessage = "Ürün ismi 2 ile 50 karakter arasında olmalıdır.")]
         public string Name { get; set; }
 
@@ -19,11 +18,11 @@ namespace MyAspNetCoreApp.Web.ViewModels
         public decimal? Price { get; set; }
 
         [Required(ErrorMessage = "Ürün adedi boş olamaz.")]
-        [Range(1,200, ErrorMessage = "Ürün adedi aralığı 1 ile 200 arasında olmalıdır.")]
+        [Range(1, 200, ErrorMessage = "Ürün adedi aralığı 1 ile 200 arasında olmalıdır.")]
         public int? Stock { get; set; }
 
         [Required(ErrorMessage = "Ürün açıklaması boş olamaz.")]
-        [StringLength(maximumLength:500,MinimumLength =2,
+        [StringLength(maximumLength: 500, MinimumLength = 2,
             ErrorMessage = "Ürün açıklaması 2 ile 500 karakter arasında olmalıdır.")]
         public string Description { get; set; }
 

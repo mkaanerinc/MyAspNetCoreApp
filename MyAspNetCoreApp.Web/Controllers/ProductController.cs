@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.FileProviders;
 using MyAspNetCoreApp.Web.Filters;
 using MyAspNetCoreApp.Web.Helpers;
 using MyAspNetCoreApp.Web.Models;
@@ -13,14 +14,16 @@ namespace MyAspNetCoreApp.Web.Controllers
 
         private readonly AppDbContext _appDbContext;
         private readonly IMapper _mapper;
+        private readonly IFileProvider _fileProvider;
 
-        public ProductController(AppDbContext appDbContext, IMapper mapper)
+        public ProductController(AppDbContext appDbContext, IMapper mapper, IFileProvider fileProvider)
         {
             _appDbContext = appDbContext;
             _mapper = mapper;
+            _fileProvider = fileProvider;
         }
 
-        [CacheResourceFilter]
+        //[CacheResourceFilter]
         [HttpGet]
         public IActionResult Index()
         {
@@ -85,31 +88,31 @@ namespace MyAspNetCoreApp.Web.Controllers
         [HttpPost]
         public IActionResult Add(ProductViewModel productViewModel)
         {
-            //if (!string.IsNullOrEmpty(productViewModel.Name) && productViewModel.Name.StartsWith("A"))
-            //{
-            //    ModelState.AddModelError(String.Empty, "Ürün harfi A ile başlayamaz.");
-            //}
-
-            ViewBag.Expire = new Dictionary<string, int>()
-                {
-                    { "1 Ay", 1 },
-                    { "3 Ay", 3 },
-                    { "6 Ay", 6 },
-                    { "12 Ay", 12 },
-                };
-
-            ViewBag.ColorSelect = new SelectList(new List<ColorSelectList>()
-                {
-                    new ColorSelectList(){Data = "Mavi", Value = "Mavi"},
-                    new ColorSelectList(){Data = "Kırmızı", Value = "Kırmızı"},
-                    new ColorSelectList(){Data = "Sarı", Value = "Sarı"},
-                }, "Value", "Data");
+            IActionResult result = null;
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _appDbContext.Products.Add(_mapper.Map<Product>(productViewModel));
+                    var product = _mapper.Map<Product>(productViewModel);
+
+                    if (productViewModel.Image != null && productViewModel.Image.Length > 0)
+                    {
+                        var root = _fileProvider.GetDirectoryContents("wwwroot");
+                        var images = root.First(x => x.Name == "images");
+
+                        var randomImageName = Guid.NewGuid() + Path.GetExtension(productViewModel.Image.FileName);
+
+                        var path = Path.Combine(images.PhysicalPath, randomImageName);
+
+                        using FileStream fileStream = new FileStream(path, FileMode.Create);
+
+                        productViewModel.Image.CopyTo(fileStream);
+
+                        product.ImagePath = randomImageName;
+                    }
+
+                    _appDbContext.Products.Add(product);
                     _appDbContext.SaveChanges();
 
                     TempData["status"] = "Ürün başarıyla eklendi.";
@@ -117,16 +120,30 @@ namespace MyAspNetCoreApp.Web.Controllers
                     return RedirectToAction("Index", "Product");
                 }
                 catch (Exception)
-                {
-
-                    ModelState.AddModelError(String.Empty,"Ürün kaydedilirken bir hata meydana geldi.");
-
-                    return View();
+                {                   
+                    result = View();
                 }
             }else
             {
-                return View();
-            }           
+                result = View();
+            }
+
+            ViewBag.Expire = new Dictionary<string, int>()
+            {
+                    { "1 Ay", 1 },
+                    { "3 Ay", 3 },
+                    { "6 Ay", 6 },
+                    { "12 Ay", 12 },
+            };
+
+            ViewBag.ColorSelect = new SelectList(new List<ColorSelectList>()
+                {
+                    new ColorSelectList(){Data = "Mavi", Value = "Mavi"},
+                    new ColorSelectList(){Data = "Kırmızı", Value = "Kırmızı"},
+                    new ColorSelectList(){Data = "Sarı", Value = "Sarı"},
+            }, "Value", "Data");
+
+            return result;
         }
 
         [ServiceFilter(typeof(NotFoundFilter))]
@@ -151,11 +168,11 @@ namespace MyAspNetCoreApp.Web.Controllers
                 new ColorSelectList(){Data = "Sarı", Value = "Sarı"},
             }, "Value", "Data",product.Color);
 
-            return View(_mapper.Map<ProductViewModel>(product));
+            return View(_mapper.Map<ProductUpdateViewModel>(product));
         }
 
         [HttpPost]
-        public IActionResult Update(ProductViewModel productViewModel)
+        public IActionResult Update(ProductUpdateViewModel productViewModel)
         {
 
             if (!ModelState.IsValid)
@@ -178,6 +195,24 @@ namespace MyAspNetCoreApp.Web.Controllers
 
                 return View();
             }
+
+            if(productViewModel.Image != null && productViewModel.Image.Length > 0)
+                    {
+                var root = _fileProvider.GetDirectoryContents("wwwroot");
+                var images = root.First(x => x.Name == "images");
+
+                var randomImageName = Guid.NewGuid() + Path.GetExtension(productViewModel.Image.FileName);
+
+                var path = Path.Combine(images.PhysicalPath, randomImageName);
+
+                using FileStream fileStream = new FileStream(path, FileMode.Create);
+
+                productViewModel.Image.CopyTo(fileStream);
+
+                productViewModel.ImagePath = randomImageName;
+            }
+
+
 
             _appDbContext.Products.Update(_mapper.Map<Product>(productViewModel));
             _appDbContext.SaveChanges();

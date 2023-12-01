@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using MyAspNetCoreApp.Web.Filters;
 using MyAspNetCoreApp.Web.Helpers;
 using MyAspNetCoreApp.Web.Models;
@@ -16,6 +17,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 //DI Container
+builder.Services.AddSingleton<IFileProvider>
+    (new PhysicalFileProvider(Directory.GetCurrentDirectory()));
 builder.Services.AddSingleton<IHelper,Helper>();
 builder.Services.AddScoped<NotFoundFilter>();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
