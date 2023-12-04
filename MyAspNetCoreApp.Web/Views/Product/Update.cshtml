@@ -8,7 +8,7 @@
 <form asp-controller="Product" asp-action="Update" method="post" enctype="multipart/form-data">
 
     <input type="hidden" asp-for="Id"/>
-    <input type="hidden" asp-for="ImagePath"/>
+    <input type="hidden" asp-for="ImagePath" />
 
     <div class="mb-3">
         @if (!String.IsNullOrEmpty(Model.ImagePath))
@@ -77,6 +77,13 @@
         <label asp-for="PublishDate" class="form-label">Ürün Yayın Tarihi</label>
         <input class="form-control" asp-for="PublishDate">
         <span class="text-danger" asp-validation-for="PublishDate"></span>
+    </div>
+
+    <div class="mb-3">
+        <select class="form-select" asp-for="CategoryId" asp-items="@ViewBag.CategorySelect">
+            <option value="">Kategori seçiniz</option>
+        </select>
+        <span class="text-danger" asp-validation-for="CategoryId"></span>
     </div>
 
     <div class="mb-3">

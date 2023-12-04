@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using MyAspNetCoreApp.Web.Filters;
 using MyAspNetCoreApp.Web.Helpers;
@@ -27,10 +28,23 @@ namespace MyAspNetCoreApp.Web.Controllers
         [HttpGet]
         public IActionResult Index()
         {
+            List<ProductViewModel> products = _appDbContext.Products.Include(p => p.Category)
+                .Select(p => new ProductViewModel
+                {
+                   Id = p.Id,
+                   Name = p.Name,
+                   Price = p.Price,
+                   Stock = p.Stock,
+                   CategoryName = p.Category.Name,
+                   Color = p.Color,
+                   Description = p.Description,
+                   Expire = p.Expire,
+                   ImagePath = p.ImagePath,
+                   isPublish = p.isPublish,
+                   PublishDate = p.PublishDate
+                }).ToList();
 
-            var products = _appDbContext.Products.ToList();
-
-            return View(_mapper.Map<List<ProductViewModel>>(products));
+            return View(products);
         }
 
         [Route("[controller]/[action]/{page}/{pageSize}")]
@@ -81,6 +95,10 @@ namespace MyAspNetCoreApp.Web.Controllers
                 new ColorSelectList(){Data = "Kırmızı", Value = "Kırmızı"},
                 new ColorSelectList(){Data = "Sarı", Value = "Sarı"},
             },"Value","Data");
+
+            var categories = _appDbContext.Category.ToList();
+
+            ViewBag.CategorySelect = new SelectList(categories, "Id", "Name");
 
             return View();
         }
@@ -143,6 +161,10 @@ namespace MyAspNetCoreApp.Web.Controllers
                     new ColorSelectList(){Data = "Sarı", Value = "Sarı"},
             }, "Value", "Data");
 
+            var categories = _appDbContext.Category.ToList();
+
+            ViewBag.CategorySelect = new SelectList(categories, "Id", "Name");
+
             return result;
         }
 
@@ -168,13 +190,16 @@ namespace MyAspNetCoreApp.Web.Controllers
                 new ColorSelectList(){Data = "Sarı", Value = "Sarı"},
             }, "Value", "Data",product.Color);
 
+            var categories = _appDbContext.Category.ToList();
+
+            ViewBag.CategorySelect = new SelectList(categories, "Id", "Name",product.CategoryId);
+
             return View(_mapper.Map<ProductUpdateViewModel>(product));
         }
 
         [HttpPost]
         public IActionResult Update(ProductUpdateViewModel productViewModel)
         {
-
             if (!ModelState.IsValid)
             {
                 ViewBag.ExpireValue = productViewModel.Expire;
@@ -192,6 +217,10 @@ namespace MyAspNetCoreApp.Web.Controllers
                     new ColorSelectList(){Data = "Kırmızı", Value = "Kırmızı"},
                     new ColorSelectList(){Data = "Sarı", Value = "Sarı"},
                 }, "Value", "Data", productViewModel.Color);
+
+                var categories = _appDbContext.Category.ToList();
+
+                ViewBag.CategorySelect = new SelectList(categories, "Id", "Name", productViewModel.CategoryId);
 
                 return View();
             }
